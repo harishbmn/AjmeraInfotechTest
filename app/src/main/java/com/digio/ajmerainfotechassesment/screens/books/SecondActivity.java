@@ -1,5 +1,6 @@
 package com.digio.ajmerainfotechassesment.screens.books;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -32,13 +33,11 @@ public class SecondActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     BooksDetailsAdapter booksDetailsAdapter;
     List<BooksModel> booksModelList = new ArrayList<>();
-    List<BooksModel> getBooksList = new ArrayList<>();
-    List<BookDetails> bookDetailsList = new ArrayList<>();
     List<BookDetails> list = new ArrayList<>();
+    List<BookDetails> detailsList = new ArrayList<>();
     DBHelper dbHelper;
     String authorName;
-    String booksList = null;
-    private JsonArray respParamArry;
+    private Integer id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +50,15 @@ public class SecondActivity extends AppCompatActivity {
         addBookButton = findViewById(R.id.add_author_button);
         recyclerView = findViewById(R.id.recyclerview_books_list);
 
-
         authorName = getIntent().getStringExtra("author_name");
+        id = ((getIntent().getIntExtra("author_id", 0)));
+        list = dbHelper.getBooks();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(id)) {
+                detailsList.add(list.get(i));
+            }
+        }
         initRecyclerview();
-        getBooksListFromDB();
 
         addBookButton.setOnClickListener(view -> {
             String book = Objects.requireNonNull(bookName.getText()).toString().trim();
@@ -62,8 +66,6 @@ public class SecondActivity extends AppCompatActivity {
             if (book.length() != 0 && amount.length() != 0) {
                 booksModelList.clear();
                 insertBooks();
-                getBooksListFromDB();
-
             } else {
                 Toast.makeText(SecondActivity.this, "Please Enter Book Details", Toast.LENGTH_SHORT).show();
             }
@@ -72,79 +74,20 @@ public class SecondActivity extends AppCompatActivity {
 
     }
 
-    private void getBooksListFromDB() {
-        if (dbHelper.getAuthorList() != null) {
-            booksModelList.clear();
-            booksModelList = dbHelper.getBooksList();
-            for (int i = 0; i < booksModelList.size(); i++) {
-                String name = booksModelList.get(i).getAuthor();
-                if (name.equalsIgnoreCase(authorName)) {
-                    getBooksList.add(booksModelList.get(i));
-                    try {
-                        convertJsontoPojo(getBooksList);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-            }
-
-        }
-    }
-
-    private void convertJsontoPojo(List<BooksModel> getBooksList) throws JSONException {
-        // list.clear();
-        try {
-            JSONArray jsonArray = new JSONArray(getBooksList.get(0).getBooks());
-            JSONObject values;
-            booksList = String.valueOf(jsonArray);
-
-            for (int j = 0; j < jsonArray.length(); j++) {
-                values = jsonArray.getJSONObject(j);
-                String book = values.getString("book");
-                String mrp = values.getString("mrp");
-
-                BookDetails data = new BookDetails(book, mrp);
-                list.add(data);
-                initRecyclerview();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void insertBooks() {
         String book = Objects.requireNonNull(bookName.getText()).toString().trim();
         String amount = Objects.requireNonNull(price.getText()).toString().trim();
-        BookDetails booksModel = new BookDetails(book, amount);
-        bookDetailsList.add(booksModel);
-        dbHelper.deleteAuthorBooks(authorName);
-        saveBooksIntoObject();
-        dbHelper.insertBookDetails(authorName, respParamArry);
-        getBooksListFromDB();
+        BookDetails booksModel = new BookDetails(book, amount, id);
+        dbHelper.addBookDetails(booksModel);
+        list = dbHelper.getBooks();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(id)) {
+                detailsList.add(list.get(i));
+            }
+        }
         initRecyclerview();
 
-    }
-
-    public void saveBooksIntoObject() {
-
-        try {
-            respParamArry = new JsonArray();
-            for (int i = 0; i < bookDetailsList.size(); i++) {
-                String books = bookDetailsList.get(i).getBookName();
-                String mrp = (bookDetailsList.get(i).getPrice());
-
-                JsonObject respParamObj = new JsonObject();
-
-                respParamObj.addProperty("book", books);
-                respParamObj.addProperty("mrp", mrp);
-                respParamArry.add(respParamObj);
-
-            }
-        } catch (Exception e) {
-            Log.e("list", "books exp: " + e.getMessage());
-        }
     }
 
     private void initRecyclerview() {
@@ -155,7 +98,7 @@ public class SecondActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setHasFixedSize(true);
-        booksDetailsAdapter = new BooksDetailsAdapter(this, list);
+        booksDetailsAdapter = new BooksDetailsAdapter(this, detailsList);
         recyclerView.setAdapter(booksDetailsAdapter);
     }
 

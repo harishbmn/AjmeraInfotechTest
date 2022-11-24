@@ -25,6 +25,7 @@ public class FirstActivity extends AppCompatActivity {
     AuthorAdapter authorAdapter;
     List<AuthorModel> modelList = new ArrayList<>();
     boolean checkingAuthor = false;
+    int id =1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +54,9 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     private void getAuthorListFromDB() {
-        if (dbHelper.getAuthorList() != null) {
+        if (dbHelper.getAllParentListItem() != null) {
             modelList.clear();
-            modelList = dbHelper.getAuthorList();
+            modelList = dbHelper.getAllParentListItem();
             initRecyclerview();
 
         }
@@ -81,7 +82,9 @@ public class FirstActivity extends AppCompatActivity {
             }
         }
       if (!checkingAuthor){
-          dbHelper.insertAuthorList(author);
+          AuthorModel authorModel = new AuthorModel(author,id);
+          id++;
+          dbHelper.addAuthor(authorModel);
       }else {
           Toast.makeText(this, "Author name already exits", Toast.LENGTH_SHORT).show();
       }

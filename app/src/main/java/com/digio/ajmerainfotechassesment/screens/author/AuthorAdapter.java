@@ -44,6 +44,7 @@ class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.ViewHolder> {
             holder.rootLayout.setOnClickListener(view -> {
                 Intent intent = new Intent(context, SecondActivity.class);
                 intent.putExtra("author_name", list.get(position).getAuthor());
+                intent.putExtra("author_id", list.get(position).getId());
                 context.startActivity(intent);
             });
 

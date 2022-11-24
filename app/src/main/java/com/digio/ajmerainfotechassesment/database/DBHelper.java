@@ -1,5 +1,6 @@
 package com.digio.ajmerainfotechassesment.database;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -7,18 +8,24 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.digio.ajmerainfotechassesment.screens.author.AuthorModel;
+import com.digio.ajmerainfotechassesment.screens.model.BookDetails;
 import com.digio.ajmerainfotechassesment.screens.model.BooksModel;
 import com.google.gson.JsonArray;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Books.db";
-    public static final String BOOKS_TABLE = "books_list";
-    public static final String AUTHOR_TABLE = "author_list";
-    public static final String AUTHOR = "author";
-    public static final String BOOK_DETAILS = "book_details";
     private static final int DATABASE_VERSION = 12;
+    private final String AUTHOR_TABLE = "author_list";
+    private final String AUTHOR_LIST_ID = "id";
+    private final String AUTHOR_NAME = "author_name";
+    private final String BOOKS_TABLE = "books_list";
+    private final String BOOK_LIST_ID = "id";
+    private final String TABLE_AUTHOR_LIST_ID = "parent_id";
+    private final String BOOK_NAME = "name";
+    private final String BOOK_PRICE = "price";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -26,16 +33,19 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(
-                "CREATE TABLE " + BOOKS_TABLE +
-                        "(" + AUTHOR + " TEXT , " +
-                        BOOK_DETAILS + " TEXT)"
-        );
 
-        sqLiteDatabase.execSQL(
-                "CREATE TABLE " + AUTHOR_TABLE +
-                        "(" + AUTHOR + " TEXT)"
-        );
+        String CREATE_MAIN_LIST_TABLE = "CREATE TABLE " + AUTHOR_TABLE + "("
+                + AUTHOR_LIST_ID + " INTEGER PRIMARY KEY,"
+                + AUTHOR_NAME + " TEXT" + ")";
+
+        String CREATE_TABLE_CHILD_LIST = "CREATE TABLE " + BOOKS_TABLE + "("
+                + BOOK_LIST_ID + " INTEGER PRIMARY KEY,"
+                + TABLE_AUTHOR_LIST_ID + " INTEGER,"
+                + BOOK_NAME + " TEXT ,"
+                + BOOK_PRICE + " TEXT" + ")";
+
+        sqLiteDatabase.execSQL(CREATE_MAIN_LIST_TABLE);
+        sqLiteDatabase.execSQL(CREATE_TABLE_CHILD_LIST);
     }
 
     @Override
@@ -45,63 +55,76 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-
-    public void insertBookDetails(String author, JsonArray book_details) {
+    public void addAuthor(AuthorModel authorModel) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.put(AUTHOR, author);
-        contentValues.put(BOOK_DETAILS, String.valueOf((book_details)));
-
-
-        db.insert(BOOKS_TABLE, null, contentValues);
+        ContentValues values = new ContentValues();
+        values.put(AUTHOR_NAME, authorModel.getAuthor());
+        db.insert(AUTHOR_TABLE, null, values);
+        db.close();
     }
 
-    public void insertAuthorList(String author) {
+    public void addBookDetails(BookDetails item) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.put(AUTHOR, author);
-        db.insert(AUTHOR_TABLE, null, contentValues);
+        ContentValues values = new ContentValues();
+        values.put(BOOK_NAME, item.getBookName());
+        values.put(BOOK_PRICE, item.getPrice());
+        values.put(TABLE_AUTHOR_LIST_ID, item.getId());
+        db.insert(BOOKS_TABLE, null, values);
+        db.close();
     }
 
+    public List<AuthorModel> getAllParentListItem() {
+        List<AuthorModel> result = new ArrayList<>();
 
-    public ArrayList<AuthorModel> getAuthorList() {
-        ArrayList<AuthorModel> arraylist = new ArrayList<>();
-        SQLiteDatabase sql = this.getWritableDatabase();
-        Cursor c = sql.rawQuery("SELECT * FROM " + AUTHOR_TABLE, null);
-        while (c.moveToNext()) {
-            AuthorModel Data = new AuthorModel();
-            Data.setAuthor(c.getString(0));
-            arraylist.add(Data);
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(AUTHOR_TABLE, null, null, null, null, null, null);
+
+        while (cursor.moveToNext()) {
+            AuthorModel item = new AuthorModel();
+            item.setId(getIntByColumName(cursor, BOOK_LIST_ID));
+            item.setAuthor(getStringByColumName(cursor, AUTHOR_NAME));
+            result.add(item);
         }
-        c.close();
-        return arraylist;
+        cursor.close();
+        db.close();
+        return result;
     }
 
-    public ArrayList<BooksModel> getBooksList() {
-        ArrayList<BooksModel> arraylist = new ArrayList<>();
-        SQLiteDatabase sql = this.getWritableDatabase();
-        Cursor c = sql.rawQuery("SELECT * FROM " + BOOKS_TABLE, null);
-        while (c.moveToNext()) {
-            BooksModel Data = new BooksModel();
-            Data.setAuthor(c.getString(0));
-            Data.setBooks(c.getString(1));
+    public List<BookDetails> getBooks() {
+        List<BookDetails> result = new ArrayList<>();
 
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(BOOKS_TABLE, null, null, null, null, null, null);
 
-            arraylist.add(Data);
+        while (cursor.moveToNext()) {
+            BookDetails item = new BookDetails();
+            item.setId(Integer.valueOf(getStringByColumName(cursor,BOOK_LIST_ID)));
+            item.setBookName(getStringByColumName(cursor, BOOK_NAME));
+            item.setPrice(getStringByColumName(cursor, BOOK_PRICE));
+            result.add(item);
         }
-        c.close();
-        return arraylist;
+        cursor.close();
+        db.close();
+        return result;
     }
 
-    public void deleteAuthorBooks(String author) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(BOOKS_TABLE, "author = ?", new String[]{author});
+    @SuppressLint("Range")
+    public int getIntByColumName(Cursor cursor, String tableColumn) {
+        return cursor.getInt(cursor.getColumnIndex(tableColumn));
     }
 
-    public void deleteAuthor(String author) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(AUTHOR_TABLE, "author = ?", new String[]{author});
+
+    @SuppressLint("Range")
+    public double getDoubleByColumName(Cursor cursor, String tableColumn) {
+        return cursor.getDouble(cursor.getColumnIndex(tableColumn));
     }
+
+
+    @SuppressLint("Range")
+    public String getStringByColumName(Cursor cursor, String tableColumn) {
+        return cursor.getString(cursor.getColumnIndex(tableColumn));
+    }
+
+
+
 }

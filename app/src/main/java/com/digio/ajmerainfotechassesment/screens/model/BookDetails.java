@@ -4,13 +4,24 @@ public
 class BookDetails {
     String bookName;
     String price;
+    Integer id;
 
-    public BookDetails(String bookName, String price) {
+    public BookDetails(String bookName, String price, Integer id) {
         this.bookName = bookName;
         this.price = price;
+        this.id = id;
     }
+
     public BookDetails() {
 
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getBookName() {
