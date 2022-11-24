@@ -13,19 +13,25 @@
         android:layout_height="50dp"
         android:background="@color/teal_700"
         android:gravity="center"
-        android:text="Author List"
+        android:text="Books List"
         android:textColor="@color/white"
         android:textSize="22sp"
         android:textStyle="bold" />
 
     <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/et_author"
+        android:id="@+id/et_book"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:inputType="textCapSentences"
-        android:singleLine="true"
         android:layout_margin="20dp"
-        android:hint="Enter Author Name"
+        android:hint="Enter Book Name"
+        android:textSize="15sp" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/et_price"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        android:hint="Enter Book Price"
         android:textSize="15sp" />
 
     <androidx.appcompat.widget.AppCompatButton
@@ -34,13 +40,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@color/teal_700"
-        android:text="Add Author"
+        android:text="Add Book"
         android:textColor="@color/white" />
 
-
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview_list"
+        android:id="@+id/recyclerview_books_list"
         android:layout_width="match_parent"
+        android:layout_margin="10dp"
         android:paddingTop="20dp"
         android:layout_height="wrap_content" />
 
