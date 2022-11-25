@@ -82,7 +82,8 @@ public class SecondActivity extends AppCompatActivity {
         dbHelper.addBookDetails(booksModel);
         getListFromDB();
         initRecyclerview();
-
+        bookName.getText().clear();
+        price.getText().clear();
     }
 
     private void initRecyclerview() {

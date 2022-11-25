@@ -43,7 +43,6 @@ public class FirstActivity extends AppCompatActivity {
             String author = Objects.requireNonNull(authorName.getText()).toString().trim();
             if (author.length() != 0) {
                 insertAuthor();
-                modelList.clear();
                 getAuthorListFromDB();
             } else {
                 Toast.makeText(FirstActivity.this, "Please Enter Author", Toast.LENGTH_SHORT).show();
@@ -88,6 +87,7 @@ public class FirstActivity extends AppCompatActivity {
       }else {
           Toast.makeText(this, "Author name already exits", Toast.LENGTH_SHORT).show();
       }
+      authorName.getText().clear();
 
     }
 }
