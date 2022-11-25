@@ -22,10 +22,11 @@ public class DBHelper extends SQLiteOpenHelper {
     private final String AUTHOR_LIST_ID = "id";
     private final String AUTHOR_NAME = "author_name";
     private final String BOOKS_TABLE = "books_list";
-    private final String BOOK_LIST_ID = "id";
+    private final String BOOK_LIST_ID = "book_id";
     private final String TABLE_AUTHOR_LIST_ID = "parent_id";
     private final String BOOK_NAME = "name";
     private final String BOOK_PRICE = "price";
+    private final String AUTHOR = "author";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -42,6 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + BOOK_LIST_ID + " INTEGER PRIMARY KEY,"
                 + TABLE_AUTHOR_LIST_ID + " INTEGER,"
                 + BOOK_NAME + " TEXT ,"
+                + AUTHOR + " TEXT ,"
                 + BOOK_PRICE + " TEXT" + ")";
 
         sqLiteDatabase.execSQL(CREATE_MAIN_LIST_TABLE);
@@ -68,6 +70,7 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(BOOK_NAME, item.getBookName());
         values.put(BOOK_PRICE, item.getPrice());
+        values.put(AUTHOR, item.getAuthorName());
         values.put(TABLE_AUTHOR_LIST_ID, item.getId());
         db.insert(BOOKS_TABLE, null, values);
         db.close();
@@ -81,7 +84,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         while (cursor.moveToNext()) {
             AuthorModel item = new AuthorModel();
-            item.setId(getIntByColumName(cursor, BOOK_LIST_ID));
+            item.setId(getIntByColumName(cursor, AUTHOR_LIST_ID));
             item.setAuthor(getStringByColumName(cursor, AUTHOR_NAME));
             result.add(item);
         }
@@ -101,6 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
             item.setId(Integer.valueOf(getStringByColumName(cursor,BOOK_LIST_ID)));
             item.setBookName(getStringByColumName(cursor, BOOK_NAME));
             item.setPrice(getStringByColumName(cursor, BOOK_PRICE));
+            item.setAuthorName(getStringByColumName(cursor, AUTHOR));
             result.add(item);
         }
         cursor.close();

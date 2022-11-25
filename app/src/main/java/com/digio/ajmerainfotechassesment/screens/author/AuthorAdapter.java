@@ -15,11 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.digio.ajmerainfotechassesment.R;
 import com.digio.ajmerainfotechassesment.screens.books.SecondActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public
 class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.ViewHolder> {
-    List<AuthorModel> list;
+    List<AuthorModel> list = new ArrayList<>();
     Context context;
 
     public AuthorAdapter(FirstActivity firstActivity, List<AuthorModel> modelList) {

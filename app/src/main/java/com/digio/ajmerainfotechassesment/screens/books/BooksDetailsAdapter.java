@@ -24,6 +24,7 @@ import java.util.List;
 public class BooksDetailsAdapter extends RecyclerView.Adapter<BooksDetailsAdapter.ViewHolder> {
     Context context;
     List<BookDetails> booksModelArrayList;
+    List<BookDetails> newList = new ArrayList<>();
 
 
     public BooksDetailsAdapter(SecondActivity secondActivity, List<BookDetails> booksModelList) {
@@ -42,9 +43,9 @@ public class BooksDetailsAdapter extends RecyclerView.Adapter<BooksDetailsAdapte
     public void onBindViewHolder(@NonNull BooksDetailsAdapter.ViewHolder holder, int position) {
 
         if (booksModelArrayList.size() != 0) {
-            holder.name.setText(booksModelArrayList.get(position).getBookName());
+            holder.name.setText("Book Name : "+booksModelArrayList.get(position).getBookName());
             String price = booksModelArrayList.get(position).getPrice();
-            holder.book.setText(price);
+            holder.book.setText("Price : "+price);
 
         }
 
